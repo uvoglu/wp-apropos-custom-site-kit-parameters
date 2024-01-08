@@ -4,7 +4,7 @@
  * Plugin Name:       Custom Google Analytics Parameters
  * Plugin URI:        https://github.com/uvoglu/wp-apropos-custom-site-kit-parameters
  * Description:       Add custom post metadata to Google Analytics using. Requires Site Kit and Polylang.
- * Version:           0.1.0
+ * Version:           0.1.1
  * Author:            Simon Schuhmacher
  * Author URI:        https://uvoglu.com
  * License:           GPL v2 or later
@@ -29,7 +29,7 @@ class Apropos_CustomSiteKitParameters {
     
         if ( is_singular( 'post' ) ) {
             $issues_current = get_the_terms( $post->ID, 'issue' );
-            if ( ! empty( $issues_current ) ) {
+            if ( ! empty( $issues_current ) && is_array( $issues_current ) ) {
                 $issues_en = $this->get_issues_translated( $issues_current, 'en' );
                 $issues = ! empty( $issues_en ) ? $issues_en : $issues_current;
     
@@ -46,9 +46,11 @@ class Apropos_CustomSiteKitParameters {
                 $filtered_gtag_opt[ self::CUSTOM_DIMENSION_POST_SLUG ] = $post_en->post_name;
             }
     
-            $post_language = pll_get_post_language( $post->ID, 'slug' );
-            if ( ! empty( $post_language ) ) {
-                $filtered_gtag_opt[ self::CUSTOM_DIMENSION_POST_LANGUAGE ] = $post_language;
+            if ( function_exists( 'pll_get_post_language' ) ) {
+                $post_language = pll_get_post_language( $post->ID, 'slug' );
+                if ( ! empty( $post_language ) ) {
+                    $filtered_gtag_opt[ self::CUSTOM_DIMENSION_POST_LANGUAGE ] = $post_language;
+                }   
             }
         }
     
@@ -59,11 +61,13 @@ class Apropos_CustomSiteKitParameters {
         $issues_translated = array();
     
         foreach ( $issues as $issue ) {
-            $issue_translations = pll_get_term_translations( $issue->term_id );
-            if ( ! empty( $issue_translations[ $language ] ) ) {
-                $issue_translated = get_term( $issue_translations[  $language], 'issue' );
-                if ( isset( $issue_translated ) ) {
-                    array_push( $issues_translated, $issue_translated );
+            if ( function_exists( 'pll_get_term_translations' ) ) {
+                $issue_translations = pll_get_term_translations( $issue->term_id );
+                if ( ! empty( $issue_translations[ $language ] ) ) {
+                    $issue_translated = get_term( $issue_translations[ $language ], 'issue' );
+                    if ( isset( $issue_translated ) ) {
+                        array_push( $issues_translated, $issue_translated );
+                    }
                 }
             }
         }
@@ -72,10 +76,12 @@ class Apropos_CustomSiteKitParameters {
     }
 
     private function get_post_translated( $post_id, $language ) {
-        $post_translations = pll_get_post_translations( $post_id );
-    
-        if ( ! empty( $post_translations[ $language ] ) ) {
-            return get_post( $post_translations[ $language ] );
+        if ( function_exists( 'pll_get_post_translations' ) ) {
+            $post_translations = pll_get_post_translations( $post_id );
+        
+            if ( ! empty( $post_translations[ $language ] ) ) {
+                return get_post( $post_translations[ $language ] );
+            }
         }
     
         return null;
