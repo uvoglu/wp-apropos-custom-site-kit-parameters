@@ -3,8 +3,8 @@
 /*
  * Plugin Name:       Custom Google Analytics Parameters
  * Plugin URI:        https://github.com/uvoglu/wp-apropos-custom-site-kit-parameters
- * Description:       Add custom post metadata to Google Analytics using. Requires Site Kit and Polylang.
- * Version:           0.1.1
+ * Description:       Add custom post metadata to Google Analytics. This plugin acts as an extension for the Site Kit by Google plugin and configuration needs to be done in the Site Kit plugin.
+ * Version:           0.1.2
  * Author:            Simon Schuhmacher
  * Author URI:        https://uvoglu.com
  * License:           GPL v2 or later
@@ -15,12 +15,13 @@
 class Apropos_CustomSiteKitParameters {
     const CUSTOM_DIMENSION_ISSUE_TITLE = 'apropos_issue_title';
     const CUSTOM_DIMENSION_ISSUE_SLUG = 'apropos_issue_slug';
-    const CUSTOM_DIMENSION_POST_SLUG = 'apropos_post_slug';
     const CUSTOM_DIMENSION_POST_TITLE = 'apropos_post_title';
+    const CUSTOM_DIMENSION_POST_SLUG = 'apropos_post_slug';
     const CUSTOM_DIMENSION_POST_LANGUAGE = 'apropos_post_language';
 
-    public function __construct() {
-        add_filter( 'googlesitekit_gtag_opt', array( $this, 'add_additional_gtag_config' ), 10, 1 );
+    public static function run() {
+        $instance = new Apropos_CustomSiteKitParameters();
+        add_filter( 'googlesitekit_gtag_opt', array( $instance, 'add_additional_gtag_config' ), 10, 1 );
     }
 
     function add_additional_gtag_config( $gtag_opt ) {
@@ -88,4 +89,4 @@ class Apropos_CustomSiteKitParameters {
     }
 }
 
-new Apropos_CustomSiteKitParameters();
+Apropos_CustomSiteKitParameters::run();
